@@ -2,7 +2,7 @@
 ;; title: CLFToken
 ;; version: 1
 ;; summary: CLARIFI(CLF) Token Contract
-;; description:
+;; description: Core Token contract for CLARIFI protocol
 
 ;; traits
 ;;
@@ -27,6 +27,12 @@
 
 ;; public functions
 ;;
+(define-public (mint (amount uint) (recipient principal))
+    (begin
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+        (ft-mint? clf-token amount recipient)
+    )
+)
 
 ;; read only functions
 ;;
