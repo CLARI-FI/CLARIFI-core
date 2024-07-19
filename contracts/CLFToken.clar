@@ -10,9 +10,14 @@
 
 ;; token definitions
 ;;
+;; No maximum supply - @dev: might need to change later
+(define-fungible-token clf-token)
 
 ;; constants
 ;;
+(define-constant contract-owner tx-sender)
+(define-constant err-owner-only (err u100))
+(define-constant err-not-token-owner (err u101))
 
 ;; data vars
 ;;
