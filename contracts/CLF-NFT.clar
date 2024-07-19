@@ -27,6 +27,13 @@
 
 ;; public functions
 ;;
+(define-public (transfer (token-id uint) (sender principal) (recipient principal))
+    (begin
+        (asserts! (is-eq tx-sender sender) err-not-token-owner)
+        ;; #[filter(token-id, recipient)]
+        (nft-transfer? CLF-NFT token-id sender recipient)
+    )
+)
 
 ;; read only functions
 ;;
