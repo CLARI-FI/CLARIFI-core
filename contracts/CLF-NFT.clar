@@ -30,6 +30,17 @@
 
 ;; read only functions
 ;;
+(define-read-only (get-last-token-id)
+    (ok (var-get last-token-id))
+)
+
+(define-read-only (get-token-uri (token-id uint))
+    (ok none)
+)
+
+(define-read-only (get-owner (token-id uint))
+    (ok (nft-get-owner? CLF-NFT token-id))
+)
 
 ;; private functions
 ;;
