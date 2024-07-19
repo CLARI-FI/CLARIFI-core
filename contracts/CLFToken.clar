@@ -30,6 +30,29 @@
 
 ;; read only functions
 ;;
+(define-read-only (get-name)
+    (ok "Clarifi-Token")
+)
+
+(define-read-only (get-symbol)
+    (ok "CLF")
+)
+
+(define-read-only (get-decimals)
+    (ok u6)
+)
+
+(define-read-only (get-balance (who principal))
+    (ok (ft-get-balance clf-token who))
+)
+
+(define-read-only (get-total-supply)
+    (ok (ft-get-supply clf-token))
+)
+
+(define-read-only (get-token-uri)
+    (ok none)
+)
 
 ;; private functions
 ;;
