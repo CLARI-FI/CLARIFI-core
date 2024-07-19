@@ -46,7 +46,7 @@
 ;; read only functions
 ;;
 (define-read-only (get-name)
-    (ok "Clarifi-Token")
+    (ok "clarifi-token")
 )
 
 (define-read-only (get-symbol)
