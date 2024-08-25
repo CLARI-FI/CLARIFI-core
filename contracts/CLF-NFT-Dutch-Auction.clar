@@ -70,6 +70,28 @@
   )
 )
 
+;; Cancel an auction
+(define-public (cancel-auction (nft-contract principal) (token-id uint))
+  (let
+    (
+      (auction (map-get? auctions {token-id: token-id, nft-contract: nft-contract}))
+    )
+    (match auction auction-details
+      (let
+        (
+          (seller (get seller auction-details))
+        )
+        (begin
+          (asserts! (is-eq seller tx-sender) err-not-owner)
+          (map-delete auctions {token-id: token-id, nft-contract: nft-contract})
+          (ok true)
+        )
+      )
+      (err err-not-auctioned)
+    )
+  )
+)
+
 ;; read-only functions
 
 ;; Get auction details
