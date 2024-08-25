@@ -104,4 +104,80 @@ describe(`${contractName} contract tests`, () => {
     tokenOwner.result.expectSome().expectPrincipal(recipient1.address);
   });
 
+
+  it("should burn an NFT", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(minter.address)],
+        minter.address
+      ),
+    ]);
+
+    let burnBlock = chain.mineBlock([
+      Tx.contractCall(contractName, "burn", [types.uint(1)], minter.address),
+    ]);
+
+    burnBlock.receipts[0].result.expectOk().expectBool(true);
+
+    let tokenOwner = chain.callReadOnlyFn(
+      contractName,
+      "get-owner",
+      [types.uint(1)],
+      minter.address
+    );
+    tokenOwner.result.expectNone();
+  });
+
+  it("should set and get token URI", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(minter.address)],
+        minter.address
+      ),
+    ]);
+
+    let uriBlock = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "set-token-uri",
+        [types.uint(1), types.buff(Buffer.from("https://example.com/nft/1"))],
+        minter.address
+      ),
+    ]);
+
+    uriBlock.receipts[0].result
+      .expectOk()
+      .expectBuff(Buffer.from("https://example.com/nft/1"));
+
+    let tokenUri = chain.callReadOnlyFn(
+      contractName,
+      "get-token-uri",
+      [types.uint(1)],
+      minter.address
+    );
+    tokenUri.result
+      .expectSome()
+      .expectBuff(Buffer.from("https://example.com/nft/1"));
+  });
+
 })
