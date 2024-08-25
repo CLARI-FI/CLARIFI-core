@@ -16,7 +16,7 @@
 
 ;; data variables
 (define-data-var owner principal tx-sender)
-(define-constant max-supply u1000000) ;; Example maximum supply
+(define-constant max-supply u1000000)
 
 ;; public functions
 
