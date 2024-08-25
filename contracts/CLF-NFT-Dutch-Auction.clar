@@ -32,6 +32,44 @@
   )
 )
 
+;; Buy NFT from Dutch auction
+(define-public (buy-from-auction (nft-contract principal) (token-id uint))
+  (let
+    (
+      (auction (map-get? auctions {token-id: token-id, nft-contract: nft-contract}))
+    )
+    (match auction auction-details
+      (let
+        (
+          (seller (get seller auction-details))
+          (start-price (get start-price auction-details))
+          (reserve-price (get reserve-price auction-details))
+          (duration (get duration auction-details))
+          (start-block (get start-block auction-details))
+        )
+        (let
+          (
+            (elapsed (block-height - start-block))
+            (price 
+              (if (> elapsed duration) 
+                reserve-price
+                (- start-price 
+                   (/ (* (- start-price reserve-price) elapsed) duration))))
+          )
+          (begin
+            (asserts! (>= (stx-get-balance tx-sender) price) err-price-not-met)
+            (stx-transfer? price tx-sender seller)
+            (nft-transfer? nft-contract token-id seller tx-sender)
+            (map-delete auctions {token-id: token-id, nft-contract: nft-contract})
+            (ok true)
+          )
+        )
+      )
+      (err err-not-auctioned)
+    )
+  )
+)
+
 ;; read-only functions
 
 ;; Get auction details
