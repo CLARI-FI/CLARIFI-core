@@ -15,8 +15,18 @@ path = 'contracts/CLF-NFT.clar'
 clarity_version = 2
 epoch = 2.5
 
+[contracts.CLF-NFT-Auction]
+path = 'contracts/CLF-NFT-Auction.clar'
+clarity_version = 2
+epoch = 2.5
+
 [contracts.CLFToken]
 path = 'contracts/CLFToken.clar'
+clarity_version = 2
+epoch = 2.5
+
+[contracts.clarifi-core]
+path = 'contracts/clarifi-core.clar'
 clarity_version = 2
 epoch = 2.5
 [repl.analysis]
