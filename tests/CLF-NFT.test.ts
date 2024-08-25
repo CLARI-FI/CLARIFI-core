@@ -46,4 +46,62 @@ describe(`${contractName} contract tests`, () => {
     );
     tokenOwner.result.expectSome().expectPrincipal(minter.address);
   });
+
+  it("should not allow unauthorized minting", () => {
+    let chain = new Chain();
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(recipient1.address)],
+        recipient1.address
+      ),
+    ]);
+
+    block.receipts[0].result.expectErr().expectUint(100);
+  });
+
+  it("should transfer NFT", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(minter.address)],
+        minter.address
+      ),
+    ]);
+
+    let transferBlock = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "transfer",
+        [
+          types.uint(1),
+          types.principal(minter.address),
+          types.principal(recipient1.address),
+        ],
+        minter.address
+      ),
+    ]);
+
+    transferBlock.receipts[0].result.expectOk().expectBool(true);
+
+    let tokenOwner = chain.callReadOnlyFn(
+      contractName,
+      "get-owner",
+      [types.uint(1)],
+      recipient1.address
+    );
+    tokenOwner.result.expectSome().expectPrincipal(recipient1.address);
+  });
+
 })
