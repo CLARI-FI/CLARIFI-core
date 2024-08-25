@@ -180,4 +180,79 @@ describe(`${contractName} contract tests`, () => {
       .expectBuff(Buffer.from("https://example.com/nft/1"));
   });
 
+  it("should set and get token metadata", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(minter.address)],
+        minter.address
+      ),
+    ]);
+
+    let metadataBlock = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "set-token-metadata",
+        [types.uint(1), types.buff(Buffer.from("metadata"))],
+        minter.address
+      ),
+    ]);
+
+    metadataBlock.receipts[0].result
+      .expectOk()
+      .expectBuff(Buffer.from("metadata"));
+
+    let tokenMetadata = chain.callReadOnlyFn(
+      contractName,
+      "get-token-metadata",
+      [types.uint(1)],
+      minter.address
+    );
+    tokenMetadata.result.expectSome().expectBuff(Buffer.from("metadata"));
+  });
+
+  it("should handle batch minting", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+    ]);
+
+    let recipients = [minter.address, recipient1.address, recipient2.address];
+    let batchMintBlock = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "batch-mint",
+        [types.list(recipients.map((recipient) => types.principal(recipient)))],
+        minter.address
+      ),
+    ]);
+
+    batchMintBlock.receipts[0].result.expectOk().expectBool(true);
+
+    recipients.forEach((recipient, index) => {
+      let tokenOwner = chain.callReadOnlyFn(
+        contractName,
+        "get-owner",
+        [types.uint(index + 1)],
+        minter.address
+      );
+      tokenOwner.result.expectSome().expectPrincipal(recipient);
+    });
+  });
+
 })
