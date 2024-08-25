@@ -1,20 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, it, beforeEach } from "vitest";
+import { Clarinet, Tx, Chain, Account, types } from "@clarinet-sdk";
 
-const accounts = simnet.getAccounts();
-const address1 = accounts.get("wallet_1")!;
+const contractName = "clf-token";
 
-/*
-  The test below is an example. To learn more, read the testing documentation here:
-  https://docs.hiro.so/clarinet/feature-guides/test-contract-with-clarinet-sdk
-*/
+describe(`${contractName} contract tests`, () => {
+  let owner: Account;
+  let recipient1: Account;
+  let recipient2: Account;
 
-describe("example tests", () => {
-  it("ensures simnet is well initalised", () => {
-    expect(simnet.blockHeight).toBeDefined();
+  beforeEach(async () => {
+    const accounts = Clarinet.getAccounts();
+    owner = accounts.get("deployer")!;
+    recipient1 = accounts.get("wallet_1")!;
+    recipient2 = accounts.get("wallet_2")!;
   });
-
-  // it("shows an example", () => {
-  //   const { result } = simnet.callReadOnlyFn("counter", "get-counter", [], address1);
-  //   expect(result).toBeUint(0);
-  // });
-});
+})
