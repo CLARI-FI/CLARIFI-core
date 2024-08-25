@@ -104,7 +104,6 @@ describe(`${contractName} contract tests`, () => {
     tokenOwner.result.expectSome().expectPrincipal(recipient1.address);
   });
 
-
   it("should burn an NFT", () => {
     let chain = new Chain();
 
@@ -255,4 +254,92 @@ describe(`${contractName} contract tests`, () => {
     });
   });
 
-})
+  it("should transfer with royalty", () => {
+    let chain = new Chain();
+
+    chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "add-minter",
+        [types.principal(minter.address)],
+        owner.address
+      ),
+      Tx.contractCall(
+        contractName,
+        "mint",
+        [types.principal(minter.address)],
+        minter.address
+      ),
+    ]);
+
+    // Step 2: Check initial balances
+    let minterInitialBalance = chain.callReadOnlyFn(
+      contractName,
+      "get-balance",
+      [types.principal(minter.address)],
+      minter.address
+    );
+    let ownerInitialBalance = chain.callReadOnlyFn(
+      contractName,
+      "get-balance",
+      [types.principal(owner.address)],
+      owner.address
+    );
+
+    let transferBlock = chain.mineBlock([
+      Tx.contractCall(
+        contractName,
+        "transfer-with-royalty",
+        [
+          types.uint(1),
+          types.principal(minter.address),
+          types.principal(recipient1.address),
+        ],
+        minter.address
+      ),
+    ]);
+
+    transferBlock.receipts[0].result.expectOk().expectBool(true);
+
+    let tokenOwner = chain.callReadOnlyFn(
+      contractName,
+      "get-owner",
+      [types.uint(1)],
+      recipient1.address
+    );
+    tokenOwner.result.expectSome().expectPrincipal(recipient1.address);
+
+    // Step 5: Check the royalty payment - Assume royalty fee is 5% (set in the contract)
+    let expectedRoyalty = minterInitialBalance.result.expectUint() * 0.05;
+
+    let minterBalanceAfterTransfer = chain.callReadOnlyFn(
+      contractName,
+      "get-balance",
+      [types.principal(minter.address)],
+      minter.address
+    );
+
+    let ownerBalanceAfterTransfer = chain.callReadOnlyFn(
+      contractName,
+      "get-balance",
+      [types.principal(owner.address)],
+      owner.address
+    );
+
+    minterBalanceAfterTransfer.result.expectUint(
+      minterInitialBalance.result.expectUint() - expectedRoyalty
+    );
+    ownerBalanceAfterTransfer.result.expectUint(
+      ownerInitialBalance.result.expectUint() + expectedRoyalty
+    );
+
+    // The recipient's balance should remain unchanged as they are only receiving the NFT, not paying any fee.
+    let recipientBalanceAfterTransfer = chain.callReadOnlyFn(
+      contractName,
+      "get-balance",
+      [types.principal(recipient1.address)],
+      recipient1.address
+    );
+    recipientBalanceAfterTransfer.result.expectUint(0); // Assuming initial balance was 0
+  });
+});
