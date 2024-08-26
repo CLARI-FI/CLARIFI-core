@@ -15,10 +15,28 @@
 (define-map listings {token-id: uint, nft-contract: principal} {seller: principal, price: uint})
 
 ;; public functions
+
 ;; List an NFT for sale
+(define-public (list-nft (nft-contract principal) (token-id uint) (price uint))
+  (let ((owner (nft-get-owner? nft-contract token-id)))
+    (begin
+      (asserts! (is-eq owner (some tx-sender)) err-not-owner)
+      (map-set listings {token-id: token-id, nft-contract: nft-contract} {seller: tx-sender, price: price})
+      (ok true)
+    )
+  )
+)
+
 ;; Purchase a listed NFT
 ;; Cancel a listing
 
 ;; read-only functions
+
 ;; Get listing details
+(define-read-only (get-listing (nft-contract principal) (token-id uint))
+  (match (map-get? listings {token-id: token-id, nft-contract: nft-contract})
+    listing (ok listing)
+    (ok none)
+  )
+)
 
