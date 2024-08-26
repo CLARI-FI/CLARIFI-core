@@ -28,6 +28,30 @@
 )
 
 ;; Purchase a listed NFT
+(define-public (buy-nft (nft-contract principal) (token-id uint))
+  (let
+    (
+      (listing (map-get? listings {token-id: token-id, nft-contract: nft-contract}))
+    )
+    (match listing listing-details
+      (let
+        (
+          (seller (get seller listing-details))
+          (price (get price listing-details))
+        )
+        (begin
+          (asserts! (>= (stx-get-balance tx-sender) price) err-price-not-met)
+          (stx-transfer? price tx-sender seller)
+          (nft-transfer? nft-contract token-id seller tx-sender)
+          (map-delete listings {token-id: token-id, nft-contract: nft-contract})
+          (ok true)
+        )
+      )
+      (err err-not-listed)
+    )
+  )
+)
+
 ;; Cancel a listing
 
 ;; read-only functions
