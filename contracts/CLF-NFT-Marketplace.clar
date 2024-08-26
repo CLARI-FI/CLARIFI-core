@@ -53,6 +53,26 @@
 )
 
 ;; Cancel a listing
+(define-public (cancel-listing (nft-contract principal) (token-id uint))
+  (let
+    (
+      (listing (map-get? listings {token-id: token-id, nft-contract: nft-contract}))
+    )
+    (match listing listing-details
+      (let
+        (
+          (seller (get seller listing-details))
+        )
+        (begin
+          (asserts! (is-eq seller tx-sender) err-not-owner)
+          (map-delete listings {token-id: token-id, nft-contract: nft-contract})
+          (ok true)
+        )
+      )
+      (err err-not-listed)
+    )
+  )
+)
 
 ;; read-only functions
 
@@ -63,4 +83,3 @@
     (ok none)
   )
 )
-
