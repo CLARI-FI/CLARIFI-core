@@ -1,5 +1,5 @@
 import { describe, it, beforeEach } from "vitest";
-import { Clarinet, Tx, Chain, Account, types } from "@clarinet-sdk";
+import { Clarinet, Tx, Chain, Account, types } from "clarinet-sdk";
 
 const contractName = "clf-token";
 
